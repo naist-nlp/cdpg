@@ -74,12 +74,30 @@ pip install -e .
 ```
 
 ### Usage
-You can run below script as a minimal use case, which shows a CDPG with fixed hyperparameters.
+You can run below script as a minimal use case, which shows a CDPG with fixed hyperparameters.  
 
 ```
 bash run.sh
 ```
 
-Dynamic CDPG is coming soon.
+For Dynamic CDPG, you can run
 
+```
+bash run_dynamic.sh
+```
 
+For test, please refer to ./translation.py
+
+## BibTeX entry and citation info
+```
+@article{
+sakai2026domain,
+title={Domain Translation with Monolingual Lexical Distribution},
+author={Yusuke Sakai and Zhi Qu and Hidetaka Kamigaito and Taro Watanabe and Xiaojiang Liu},
+journal={Transactions on Machine Learning Research},
+issn={2835-8856},
+year={2026},
+url={https://openreview.net/forum?id=UKLBobrFCR},
+note={}
+}
+```

@@ -471,6 +471,7 @@ class Tuner():
             # best_epochs = {}
             best_f1 = 0.0
             best_bleu = 0.0
+            best_epoch = 0
             update_num_bertscore = 0
             update_num_bleu = 0
             file = open(self.log_file_path, "a", encoding='utf-8')
@@ -493,6 +494,7 @@ class Tuner():
                         file.write(f"logging: current bleu score is {current_bleu}, current f1 score is {current_f1} \n")
                         if current_f1 > best_f1 and current_f1 > self.base_f1:
                             best_f1 = current_f1
+                            best_epoch = current_epoch
                             update_num_bertscore = update_num_bertscore + 1
                             file.write(f"logging: updating best f1, current update number is {update_num_bertscore} \n")
                         if current_bleu > best_bleu and current_bleu > self.base_bleu:
@@ -503,7 +505,8 @@ class Tuner():
                         if current_epoch == self.max_epoch:
                             # if (update_num_bleu >= self.threshold_update_num) and (update_num_bertscore >= self.threshold_update_num):
                             if (update_num_bertscore >= self.threshold_update_num):
-                                file.write(f"Accept: last epoch is {self.max_epoch} \n")
+                                file.write(f"logging: best bleu score is {best_bleu}, best f1 score is {best_f1}, best epoch is {best_epoch} \n")
+                                file.write(f"Accept: best epoch is {best_epoch} \n")
                             else:
                                 file.write(f"Reject: this phase is rejected. \n")
                         file.close()
@@ -554,11 +557,12 @@ def get_current_dev(src_lang, tgt_lang, tokenizer, model, domain, device, experi
     outputs = tokenized_dataset.map(translate_with_model, batched=True, batch_size=20)
     hypos = outputs.data["hypos"].to_pylist()
     model.train()
+    bleu_refs = [[ref] for ref in refs]
     metrics = evaluate.load("sacrebleu", experiment_id=f"{domain}-{experiment_id}-{src_lang}-{tgt_lang}")
     if tgt_lang == "zh":
-        bleu = metrics.compute(references=refs, predictions=hypos, tokenize=tgt_lang)
+        bleu = metrics.compute(references=bleu_refs, predictions=hypos, tokenize=tgt_lang)
     else:
-        bleu = metrics.compute(references=refs, predictions=hypos)
+        bleu = metrics.compute(references=bleu_refs, predictions=hypos)
     metrics = evaluate.load("bertscore", experiment_id=f"{domain}-{experiment_id}-{src_lang}-{tgt_lang}")
     results = metrics.compute(references=refs, predictions=hypos, lang=tgt_lang)
     f1 = sum(results["f1"]) / len(results["f1"])
